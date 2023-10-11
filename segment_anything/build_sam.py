@@ -34,13 +34,14 @@ def build_sam_vit_l(checkpoint=None):
     )
 
 
-def build_sam_vit_b(checkpoint=None):
+def build_sam_vit_b(checkpoint=None, custom_image_size=1024):
     return _build_sam(
         encoder_embed_dim=768,
         encoder_depth=12,
         encoder_num_heads=12,
         encoder_global_attn_indexes=[2, 5, 8, 11],
         checkpoint=checkpoint,
+        custom_image_size=custom_image_size
     )
 
 
@@ -58,6 +59,7 @@ def _build_sam(
     encoder_num_heads,
     encoder_global_attn_indexes,
     checkpoint=None,
+    custom_image_size=1024 # for custom image sizes
 ):
     prompt_embed_dim = 256
     image_size = 1024
@@ -80,8 +82,11 @@ def _build_sam(
         ),
         prompt_encoder=PromptEncoder(
             embed_dim=prompt_embed_dim,
-            image_embedding_size=(image_embedding_size, image_embedding_size),
-            input_image_size=(image_size, image_size),
+            # image_embedding_size=(image_embedding_size, image_embedding_size),
+            # input_image_size=(image_size, image_size),
+            # custom image size -> custom image embedding
+            image_embedding_size=(custom_image_size//vit_patch_size, custom_image_size//vit_patch_size),
+            input_image_size=(custom_image_size, custom_image_size),
             mask_in_chans=16,
         ),
         mask_decoder=MaskDecoder(
